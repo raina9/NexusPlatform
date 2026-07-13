@@ -28,26 +28,12 @@ Status        : Active — Stabilisation + Migration Phase
 
 ---
 
-## JAVA VERSION POLICY (LOCAL OVERRIDE)
-
-Root workspace mandates Java 25 LTS.
-Nexus Platform runs Java 17 — this is intentional and permanent for this project.
-
-**Reason:** Nexus exists as an interview reference for Spring Boot 3.x + Java 17
-enterprise patterns. Most production codebases in 2026 interviews still reference
-Java 17 LTS. Migrating to Java 25 + Spring Boot 4.x would create a separate
-learning track — that belongs in a new project, not here.
-
-**Rule:** Never upgrade Nexus to Java 25 unless explicitly instructed.
-
----
-
 ## CURRENT TECH STACK
 
 ```
-Java            : 17
-Spring Boot     : 3.5.4
-Spring Cloud    : 2025.0.0 (BOM)
+Java            : 25
+Spring Boot     : 4.1.0
+Spring Cloud    : 2025.1.2 (BOM)
 Build           : Maven (with wrapper)
 Primary DB      : MySQL 8 (Employee domain)
 Secondary DB    : PostgreSQL (Department domain)
@@ -157,8 +143,6 @@ com.raina.nexus
 
 4. **REST clients call self** (localhost) — not a separate service
    Note: Acceptable for learning demo, but document this clearly
-
-5. **Stack drift vs this file's stated policy** — `pom.xml` currently declares Spring Boot 4.1.0 / Java 25 / Spring Cloud 2025.1.2, not the Java 17 + Boot 3.5.4 recorded above. Flagged for the maintainer to reconcile; not changed as part of this session per the Java 17 lock-in policy.
 
 ---
 
