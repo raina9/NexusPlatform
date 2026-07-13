@@ -1,7 +1,7 @@
 # NEXUS PLATFORM — CLAUDE.md
 # Governed by: Root Workspace CLAUDE.md (Global Brain v1.0)
 # Location: Workspace/Projects/NexusPlatform/
-# Last Updated: 2026-07-13
+# Last Updated: 2026-07-14
 
 ---
 
@@ -116,7 +116,6 @@ com.raina.nexus
 │   ├── department
 │   └── employee
 ├── exception             ← GlobalExceptionHandler, ResourceNotFoundException
-│                           ErrorResponse HERE is DEAD CODE — must be removed
 └── external
     └── weather
         ├── client
@@ -127,44 +126,39 @@ com.raina.nexus
 
 ---
 
-## CURRENT STATUS (Scanned: 2026-07-13)
+## CURRENT STATUS (Scanned: 2026-07-14)
 
 ### Completed and Working
-- Employee CRUD + Pagination + Sorting + FirstN Search + JPQL salary filter
+- Employee CRUD + Offset Pagination + Sorting + FirstN Search + JPQL salary filter
+- Employee Cursor Pagination (`/api/employees/cursor`) + Keyset Pagination via native query (`/api/employees/keyset`)
+- Employee Native Query salary filter exposed (`/api/employees/native`)
+- Employee Interface Projection exposed with Offset + Cursor + Keyset pagination (`/api/employees/projection/interface[/cursor|/keyset]`)
+- Employee DTO Projection exposed with Offset + Cursor + Keyset pagination (`/api/employees/projection/dto[/cursor|/keyset]`)
 - Department CRUD (full)
+- DepartmentWebClient exposed (`GET /api/departments/webclient/{id}`) — shared WebClient bean now has a base URL (`http://localhost:9191`), previously missing
+- Address sub-resource — full CRUD (`/api/employees/{employeeId}/addresses[/{addressId}]`) via AddressService + AddressController
 - Dual datasource — MySQL (Primary) + PostgreSQL — separate EntityManagers + TransactionManagers
 - Global Exception Handling via @RestControllerAdvice
-- Generic ApiResponse<T> wrapper
+- Generic ApiResponse<T> wrapper + CursorPageResponse<T> for cursor/keyset endpoints
 - Bean Validation
 - Weather API — 3 client implementations (RestTemplate / WebClient / Feign)
 - SLF4J + Logback logging
-- JUnit 5 + Mockito service tests + MockMvc controller tests (Employee + Department only)
-
-### Implemented but NOT Exposed (Dead from API surface)
-- Native Query in EmployeeRepository — no controller endpoint
-- Interface Projection in EmployeeRepository — no controller endpoint
-- DTO Projection in EmployeeRepository — no controller endpoint
-- DepartmentWebClient — wired but no controller endpoint
-- Address — @OneToMany on Employee exists, AddressRepository exists, NO service, NO controller
+- JUnit 5 + Mockito service tests + MockMvc controller tests (Employee + Department + Address)
 
 ### Known Issues (Must Fix Before Next Phase)
-1. **Duplicate ErrorResponse** — exists in `common.response` AND `exception` package
-   Fix: Delete `exception.ErrorResponse` — keep only `common.response.ErrorResponse`
-
-2. **Hardcoded DB credentials** in application.yaml
+1. **Hardcoded DB credentials** in application.yaml
    Fix: Move to environment profiles (application-local.yml, application-dev.yml)
    Use `${DB_PASSWORD}` env var pattern
 
-3. **No per-environment profiles** — single application.yaml does everything
+2. **No per-environment profiles** — single application.yaml does everything
    Fix: Split into application.yml (base) + application-local.yml
 
-4. **Address has no API surface** — entity + repository exists, nothing above
-   Fix: Implement AddressService + AddressController as sub-resource of Employee
+3. **Test coverage gaps** — Weather client endpoints still untested
 
-5. **Test coverage gaps** — Address, weather, pagination/search/spec endpoints untested
-
-6. **REST clients call self** (localhost) — not a separate service
+4. **REST clients call self** (localhost) — not a separate service
    Note: Acceptable for learning demo, but document this clearly
+
+5. **Stack drift vs this file's stated policy** — `pom.xml` currently declares Spring Boot 4.1.0 / Java 25 / Spring Cloud 2025.1.2, not the Java 17 + Boot 3.5.4 recorded above. Flagged for the maintainer to reconcile; not changed as part of this session per the Java 17 lock-in policy.
 
 ---
 
@@ -212,18 +206,18 @@ Common Mistakes → Testing → Troubleshooting → Next Step
 ## STABILISATION PLAN (Do in order)
 
 ### Phase 0 — Cleanup (Before anything new)
-- [ ] Delete duplicate `exception.ErrorResponse`
+- [x] Delete duplicate `exception.ErrorResponse`
 - [ ] Extract DB credentials to env vars + profiles
-- [ ] Expose Native Query endpoint
-- [ ] Expose Interface Projection endpoint
-- [ ] Expose DTO Projection endpoint
-- [ ] Expose DepartmentWebClient endpoint
-- [ ] Implement AddressService + AddressController
+- [x] Expose Native Query endpoint
+- [x] Expose Interface Projection endpoint
+- [x] Expose DTO Projection endpoint
+- [x] Expose DepartmentWebClient endpoint
+- [x] Implement AddressService + AddressController
 
 ### Phase 1 — Testing
-- [ ] Address tests
+- [x] Address tests
 - [ ] Weather client tests
-- [ ] Pagination + Search + Specification tests
+- [ ] Pagination + Search + Specification tests (cursor/keyset/projection pagination now covered; existing search/specification endpoints still untested)
 - [ ] Exception handler tests
 
 ### Phase 2 — Documentation

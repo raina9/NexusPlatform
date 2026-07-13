@@ -4,6 +4,8 @@ package com.raina.nexus.employee.repository;
 import com.raina.nexus.employee.dto.EmployeeSummaryResponse;
 import com.raina.nexus.employee.projection.EmployeeProjection;
 import com.raina.nexus.entity.employee.Employee;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -52,4 +54,84 @@ public interface EmployeeRepository
        FROM Employee e
        """)
     List<EmployeeSummaryResponse> findEmployeeSummary();
+
+    @Query("""
+       SELECT e
+       FROM Employee e
+       WHERE e.id > :cursor
+       ORDER BY e.id ASC
+       """)
+    List<Employee> findEmployeesCursor(
+            @Param("cursor") Long cursor,
+            Pageable pageable);
+
+    @Query(
+            value = """
+                SELECT *
+                FROM employees
+                WHERE id > :afterId
+                ORDER BY id ASC
+                LIMIT :size
+                """,
+            nativeQuery = true
+    )
+    List<Employee> findEmployeesKeyset(
+            @Param("afterId") Long afterId,
+            @Param("size") int size);
+
+    @Query("""
+       SELECT e
+       FROM Employee e
+       """)
+    Page<EmployeeProjection> findEmployeeProjectionPage(Pageable pageable);
+
+    @Query("""
+       SELECT e
+       FROM Employee e
+       WHERE e.id > :cursor
+       ORDER BY e.id ASC
+       """)
+    List<EmployeeProjection> findEmployeeProjectionCursor(
+            @Param("cursor") Long cursor,
+            Pageable pageable);
+
+    @Query(
+            value = """
+                SELECT id, first_name AS firstName, salary
+                FROM employees
+                WHERE id > :afterId
+                ORDER BY id ASC
+                LIMIT :size
+                """,
+            nativeQuery = true
+    )
+    List<EmployeeProjection> findEmployeeProjectionKeyset(
+            @Param("afterId") Long afterId,
+            @Param("size") int size);
+
+    @Query("""
+       SELECT new
+       com.raina.nexus.employee.dto.EmployeeSummaryResponse(
+            e.id,
+            e.firstName,
+            e.salary
+       )
+       FROM Employee e
+       """)
+    Page<EmployeeSummaryResponse> findEmployeeSummaryPage(Pageable pageable);
+
+    @Query("""
+       SELECT new
+       com.raina.nexus.employee.dto.EmployeeSummaryResponse(
+            e.id,
+            e.firstName,
+            e.salary
+       )
+       FROM Employee e
+       WHERE e.id > :cursor
+       ORDER BY e.id ASC
+       """)
+    List<EmployeeSummaryResponse> findEmployeeSummaryCursor(
+            @Param("cursor") Long cursor,
+            Pageable pageable);
 }

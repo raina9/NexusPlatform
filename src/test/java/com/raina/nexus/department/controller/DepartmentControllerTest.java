@@ -75,4 +75,23 @@ class DepartmentControllerTest {
                 .andExpect(jsonPath("$.data.departmentName")
                         .value("Engineering"));
     }
+
+    @Test
+    void shouldReturnDepartmentViaWebClient() throws Exception {
+
+        DepartmentResponse response =
+                new DepartmentResponse(
+                        1L,
+                        "Engineering"
+                );
+
+        when(departmentService.getDepartmentViaWebClient(1L))
+                .thenReturn(response);
+
+        mockMvc.perform(get("/api/departments/webclient/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.id").value(1))
+                .andExpect(jsonPath("$.data.departmentName")
+                        .value("Engineering"));
+    }
 }

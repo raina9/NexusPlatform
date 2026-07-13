@@ -1,13 +1,17 @@
 package com.raina.nexus.employee.service;
 
+import com.raina.nexus.common.response.CursorPageResponse;
 import com.raina.nexus.employee.dto.EmployeeRequest;
 import com.raina.nexus.employee.dto.EmployeeResponse;
+import com.raina.nexus.employee.dto.EmployeeSummaryResponse;
+import com.raina.nexus.employee.projection.EmployeeProjection;
 import com.raina.nexus.employee.repository.EmployeeRepository;
 import com.raina.nexus.entity.employee.Employee;
 import com.raina.nexus.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -192,5 +196,206 @@ public class EmployeeService {
                 .stream()
                 .map(this::mapToResponse)
                 .toList();
+    }
+
+    /**
+     * Get Employees With Salary Greater Than (Native Query)
+     */
+    public List<EmployeeResponse> getEmployeesWithSalaryGreaterThanNative(
+            Double salary) {
+
+        log.info(
+                "Fetching employees via native query salary greater than={}",
+                salary
+        );
+
+        return employeeRepository
+                .findEmployeesNative(salary)
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    /**
+     * Get Employees - Cursor Pagination
+     */
+    public CursorPageResponse<EmployeeResponse> getEmployeesCursor(
+            Long cursor, int size) {
+
+        log.info(
+                "Fetching employees cursor pagination cursor={}, size={}",
+                cursor,
+                size
+        );
+
+        List<Employee> rows = employeeRepository.findEmployeesCursor(
+                cursor,
+                PageRequest.of(0, size + 1)
+        );
+
+        return buildCursorPage(
+                rows.stream().map(this::mapToResponse).toList(),
+                size,
+                EmployeeResponse::id
+        );
+    }
+
+    /**
+     * Get Employees - Keyset Pagination (Native Query)
+     */
+    public CursorPageResponse<EmployeeResponse> getEmployeesKeyset(
+            Long afterId, int size) {
+
+        log.info(
+                "Fetching employees keyset pagination afterId={}, size={}",
+                afterId,
+                size
+        );
+
+        List<Employee> rows = employeeRepository.findEmployeesKeyset(
+                afterId,
+                size + 1
+        );
+
+        return buildCursorPage(
+                rows.stream().map(this::mapToResponse).toList(),
+                size,
+                EmployeeResponse::id
+        );
+    }
+
+    /**
+     * Get Employee Interface Projections - Offset Pagination
+     */
+    public Page<EmployeeProjection> getEmployeeProjections(Pageable pageable) {
+
+        log.info(
+                "Fetching employee interface projections page={}, size={}",
+                pageable.getPageNumber(),
+                pageable.getPageSize()
+        );
+
+        return employeeRepository.findEmployeeProjectionPage(pageable);
+    }
+
+    /**
+     * Get Employee Interface Projections - Cursor Pagination
+     */
+    public CursorPageResponse<EmployeeProjection> getEmployeeProjectionsCursor(
+            Long cursor, int size) {
+
+        log.info(
+                "Fetching employee interface projections cursor pagination cursor={}, size={}",
+                cursor,
+                size
+        );
+
+        List<EmployeeProjection> rows = employeeRepository
+                .findEmployeeProjectionCursor(cursor, PageRequest.of(0, size + 1));
+
+        return buildCursorPage(rows, size, EmployeeProjection::getId);
+    }
+
+    /**
+     * Get Employee Interface Projections - Keyset Pagination (Native Query)
+     */
+    public CursorPageResponse<EmployeeProjection> getEmployeeProjectionsKeyset(
+            Long afterId, int size) {
+
+        log.info(
+                "Fetching employee interface projections keyset pagination afterId={}, size={}",
+                afterId,
+                size
+        );
+
+        List<EmployeeProjection> rows = employeeRepository
+                .findEmployeeProjectionKeyset(afterId, size + 1);
+
+        return buildCursorPage(rows, size, EmployeeProjection::getId);
+    }
+
+    /**
+     * Get Employee DTO Projections - Offset Pagination
+     */
+    public Page<EmployeeSummaryResponse> getEmployeeSummaries(Pageable pageable) {
+
+        log.info(
+                "Fetching employee DTO projections page={}, size={}",
+                pageable.getPageNumber(),
+                pageable.getPageSize()
+        );
+
+        return employeeRepository.findEmployeeSummaryPage(pageable);
+    }
+
+    /**
+     * Get Employee DTO Projections - Cursor Pagination
+     */
+    public CursorPageResponse<EmployeeSummaryResponse> getEmployeeSummariesCursor(
+            Long cursor, int size) {
+
+        log.info(
+                "Fetching employee DTO projections cursor pagination cursor={}, size={}",
+                cursor,
+                size
+        );
+
+        List<EmployeeSummaryResponse> rows = employeeRepository
+                .findEmployeeSummaryCursor(cursor, PageRequest.of(0, size + 1));
+
+        return buildCursorPage(rows, size, EmployeeSummaryResponse::id);
+    }
+
+    /**
+     * Get Employee DTO Projections - Keyset Pagination (Native Query)
+     *
+     * The native keyset query returns full Employee rows since JPQL
+     * constructor expressions ("SELECT new ...") are not supported in
+     * native SQL - results are mapped to the DTO after fetch.
+     */
+    public CursorPageResponse<EmployeeSummaryResponse> getEmployeeSummariesKeyset(
+            Long afterId, int size) {
+
+        log.info(
+                "Fetching employee DTO projections keyset pagination afterId={}, size={}",
+                afterId,
+                size
+        );
+
+        List<Employee> rows = employeeRepository.findEmployeesKeyset(
+                afterId,
+                size + 1
+        );
+
+        List<EmployeeSummaryResponse> summaries = rows.stream()
+                .map(e -> new EmployeeSummaryResponse(
+                        e.getId(),
+                        e.getFirstName(),
+                        e.getSalary()
+                ))
+                .toList();
+
+        return buildCursorPage(summaries, size, EmployeeSummaryResponse::id);
+    }
+
+    /**
+     * Builds a CursorPageResponse from a size+1 fetched window
+     */
+    private <T> CursorPageResponse<T> buildCursorPage(
+            List<T> rows,
+            int size,
+            java.util.function.Function<T, Long> idExtractor) {
+
+        boolean hasNext = rows.size() > size;
+
+        List<T> content = hasNext
+                ? rows.subList(0, size)
+                : rows;
+
+        Long nextCursor = content.isEmpty()
+                ? null
+                : idExtractor.apply(content.get(content.size() - 1));
+
+        return new CursorPageResponse<>(content, nextCursor, hasNext);
     }
 }

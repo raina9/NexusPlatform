@@ -1,8 +1,11 @@
 package com.raina.nexus.employee.controller;
 
 import com.raina.nexus.common.response.ApiResponse;
+import com.raina.nexus.common.response.CursorPageResponse;
 import com.raina.nexus.employee.dto.EmployeeRequest;
 import com.raina.nexus.employee.dto.EmployeeResponse;
+import com.raina.nexus.employee.dto.EmployeeSummaryResponse;
+import com.raina.nexus.employee.projection.EmployeeProjection;
 import com.raina.nexus.employee.service.EmployeeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -125,6 +128,130 @@ public class EmployeeController {
                         "Employees fetched successfully",
                         employeeService
                                 .getEmployeesWithSalaryGreaterThan(salary)
+                )
+        );
+    }
+
+    @GetMapping("/native")
+    public ResponseEntity<ApiResponse<List<EmployeeResponse>>> getEmployeesNative(
+            @RequestParam Double salary) {
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Employees fetched successfully",
+                        employeeService
+                                .getEmployeesWithSalaryGreaterThanNative(salary)
+                )
+        );
+    }
+
+    @GetMapping("/cursor")
+    public ResponseEntity<ApiResponse<CursorPageResponse<EmployeeResponse>>> getEmployeesCursor(
+            @RequestParam(defaultValue = "0") Long cursor,
+            @RequestParam(defaultValue = "10") int size) {
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Employees fetched successfully",
+                        employeeService.getEmployeesCursor(cursor, size)
+                )
+        );
+    }
+
+    @GetMapping("/keyset")
+    public ResponseEntity<ApiResponse<CursorPageResponse<EmployeeResponse>>> getEmployeesKeyset(
+            @RequestParam(defaultValue = "0") Long afterId,
+            @RequestParam(defaultValue = "10") int size) {
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Employees fetched successfully",
+                        employeeService.getEmployeesKeyset(afterId, size)
+                )
+        );
+    }
+
+    @GetMapping("/projection/interface")
+    public ResponseEntity<ApiResponse<Page<EmployeeProjection>>> getEmployeeProjectionsPage(
+            Pageable pageable) {
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Employees fetched successfully",
+                        employeeService.getEmployeeProjections(pageable)
+                )
+        );
+    }
+
+    @GetMapping("/projection/interface/cursor")
+    public ResponseEntity<ApiResponse<CursorPageResponse<EmployeeProjection>>> getEmployeeProjectionsCursor(
+            @RequestParam(defaultValue = "0") Long cursor,
+            @RequestParam(defaultValue = "10") int size) {
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Employees fetched successfully",
+                        employeeService.getEmployeeProjectionsCursor(cursor, size)
+                )
+        );
+    }
+
+    @GetMapping("/projection/interface/keyset")
+    public ResponseEntity<ApiResponse<CursorPageResponse<EmployeeProjection>>> getEmployeeProjectionsKeyset(
+            @RequestParam(defaultValue = "0") Long afterId,
+            @RequestParam(defaultValue = "10") int size) {
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Employees fetched successfully",
+                        employeeService.getEmployeeProjectionsKeyset(afterId, size)
+                )
+        );
+    }
+
+    @GetMapping("/projection/dto")
+    public ResponseEntity<ApiResponse<Page<EmployeeSummaryResponse>>> getEmployeeSummariesPage(
+            Pageable pageable) {
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Employees fetched successfully",
+                        employeeService.getEmployeeSummaries(pageable)
+                )
+        );
+    }
+
+    @GetMapping("/projection/dto/cursor")
+    public ResponseEntity<ApiResponse<CursorPageResponse<EmployeeSummaryResponse>>> getEmployeeSummariesCursor(
+            @RequestParam(defaultValue = "0") Long cursor,
+            @RequestParam(defaultValue = "10") int size) {
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Employees fetched successfully",
+                        employeeService.getEmployeeSummariesCursor(cursor, size)
+                )
+        );
+    }
+
+    @GetMapping("/projection/dto/keyset")
+    public ResponseEntity<ApiResponse<CursorPageResponse<EmployeeSummaryResponse>>> getEmployeeSummariesKeyset(
+            @RequestParam(defaultValue = "0") Long afterId,
+            @RequestParam(defaultValue = "10") int size) {
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Employees fetched successfully",
+                        employeeService.getEmployeeSummariesKeyset(afterId, size)
                 )
         );
     }

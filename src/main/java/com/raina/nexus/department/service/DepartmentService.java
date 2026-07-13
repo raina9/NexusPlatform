@@ -1,5 +1,7 @@
 package com.raina.nexus.department.service;
 
+import com.raina.nexus.client.webclient.DepartmentWebClient;
+import com.raina.nexus.common.response.ApiResponse;
 import com.raina.nexus.department.dto.DepartmentRequest;
 import com.raina.nexus.department.dto.DepartmentResponse;
 import com.raina.nexus.department.repository.DepartmentRepository;
@@ -17,6 +19,7 @@ import java.util.List;
 public class DepartmentService {
 
     private final DepartmentRepository departmentRepository;
+    private final DepartmentWebClient departmentWebClient;
 
     /**
      * Create Department
@@ -123,5 +126,54 @@ public class DepartmentService {
                 department.getId(),
                 department.getDepartmentName()
         );
+    }
+
+    /**
+     * Get Department By Id Via WebClient
+     */
+    public DepartmentResponse getDepartmentViaWebClient(Long id) {
+
+        log.info(
+                "Fetching department via webclient with id={}",
+                id
+        );
+
+        ApiResponse<DepartmentResponse> response;
+
+        try {
+
+            response = departmentWebClient.getDepartment(id);
+
+        } catch (Exception ex) {
+
+            log.error(
+                    "DEPARTMENT_FETCH_FAILED: failed to fetch department via webclient with id={}",
+                    id,
+                    ex
+            );
+
+            throw new ResourceNotFoundException(
+                    "DEPARTMENT_FETCH_FAILED: Unable to fetch department with id : " + id
+            );
+        }
+
+        if (response == null || response.data() == null) {
+
+            log.error(
+                    "DEPARTMENT_NOT_FOUND: department not found via webclient with id={}",
+                    id
+            );
+
+            throw new ResourceNotFoundException(
+                    "DEPARTMENT_NOT_FOUND: Department not found with id : " + id
+            );
+        }
+
+        log.info(
+                "Department fetched successfully via webclient with id={}",
+                id
+        );
+
+        return response.data();
     }
 }

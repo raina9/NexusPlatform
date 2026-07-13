@@ -73,4 +73,17 @@ public class DepartmentController {
                 )
         );
     }
+
+    @GetMapping("/webclient/{id}")
+    public ResponseEntity<ApiResponse<DepartmentResponse>> getDepartmentViaWebClient(
+            @PathVariable Long id) {
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Department fetched successfully",
+                        departmentService.getDepartmentViaWebClient(id)
+                )
+        );
+    }
 }
