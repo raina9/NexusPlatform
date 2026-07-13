@@ -1,0 +1,26 @@
+spring:
+
+  datasource:
+
+    # Employee Database (MySQL) - Dev
+    employee:
+      url: jdbc:mysql://localhost:3306/employeesdb
+      username: ${DB_EMPLOYEE_USERNAME}
+      password: ${DB_EMPLOYEE_PASSWORD}
+      driver-class-name: com.mysql.cj.jdbc.Driver
+
+    # Department Database (PostgreSQL) - Dev
+    department:
+      url: jdbc:postgresql://localhost:5432/departmentsdb
+      username: ${DB_DEPARTMENT_USERNAME}
+      password: ${DB_DEPARTMENT_PASSWORD}
+      driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      # Dev — schema is managed by migrations, Hibernate only validates it matches
+      ddl-auto: validate
+    show-sql: false
+
+server:
+  port: 9191

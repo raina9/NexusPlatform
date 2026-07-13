@@ -1,0 +1,26 @@
+spring:
+
+  datasource:
+
+    # Employee Database (MySQL) - Local
+    employee:
+      url: jdbc:mysql://localhost:3306/employeesdb
+      username: ${DB_EMPLOYEE_USERNAME}
+      password: ${DB_EMPLOYEE_PASSWORD}
+      driver-class-name: com.mysql.cj.jdbc.Driver
+
+    # Department Database (PostgreSQL) - Local
+    department:
+      url: jdbc:postgresql://localhost:5432/departmentsdb
+      username: ${DB_DEPARTMENT_USERNAME}
+      password: ${DB_DEPARTMENT_PASSWORD}
+      driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      # Local dev — schema kept in sync automatically, existing data preserved
+      ddl-auto: update
+    show-sql: true
+
+server:
+  port: 9191

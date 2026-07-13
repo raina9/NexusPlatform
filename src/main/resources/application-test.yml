@@ -1,0 +1,26 @@
+spring:
+
+  datasource:
+
+    # Employee Database - H2 in-memory (MySQL compatibility mode)
+    employee:
+      url: jdbc:h2:mem:employeesdb;DB_CLOSE_DELAY=-1;MODE=MySQL
+      username: sa
+      password:
+      driver-class-name: org.h2.Driver
+
+    # Department Database - H2 in-memory (PostgreSQL compatibility mode)
+    department:
+      url: jdbc:h2:mem:departmentsdb;DB_CLOSE_DELAY=-1;MODE=PostgreSQL
+      username: sa
+      password:
+      driver-class-name: org.h2.Driver
+
+  jpa:
+    hibernate:
+      # Test — fresh schema per run, no data to preserve
+      ddl-auto: create-drop
+    show-sql: true
+
+server:
+  port: 9191
