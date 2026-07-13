@@ -1,7 +1,7 @@
 # NEXUS PLATFORM — CLAUDE.md
 # Governed by: Root Workspace CLAUDE.md (Global Brain v1.0)
 # Location: Workspace/Projects/NexusPlatform/
-# Last Updated: 2026-07-14
+# Last Updated: 2026-07-14 (session 3)
 
 ---
 
@@ -129,19 +129,14 @@ com.raina.nexus
 - Bean Validation
 - Weather API — 3 client implementations (RestTemplate / WebClient / Feign)
 - SLF4J + Logback logging
-- JUnit 5 + Mockito service tests + MockMvc controller tests (Employee + Department + Address)
+- JUnit 5 + Mockito service tests + MockMvc controller tests (Employee + Department + Address + Weather + GlobalExceptionHandler)
+- Per-environment config profiles — application-local.yml (MySQL/Postgres, ddl-auto update), application-dev.yml (ddl-auto validate, show-sql false), application-test.yml (H2 in-memory, ddl-auto create-drop)
+- CURL_COLLECTION.md and Nexus-Platform.postman_collection.json — full request collections covering every endpoint, kept in the project root
 
 ### Known Issues (Must Fix Before Next Phase)
-1. **Hardcoded DB credentials** in application.yaml
-   Fix: Move to environment profiles (application-local.yml, application-dev.yml)
-   Use `${DB_PASSWORD}` env var pattern
+1. **Test coverage gaps** — `/api/employees/search` and `/api/employees/specification` endpoints still untested (cursor/keyset/projection/native/weather/exception-handler paths are now covered)
 
-2. **No per-environment profiles** — single application.yaml does everything
-   Fix: Split into application.yml (base) + application-local.yml
-
-3. **Test coverage gaps** — Weather client endpoints still untested
-
-4. **REST clients call self** (localhost) — not a separate service
+2. **REST clients call self** (localhost) — not a separate service
    Note: Acceptable for learning demo, but document this clearly
 
 ---
@@ -191,7 +186,7 @@ Common Mistakes → Testing → Troubleshooting → Next Step
 
 ### Phase 0 — Cleanup (Before anything new)
 - [x] Delete duplicate `exception.ErrorResponse`
-- [ ] Extract DB credentials to env vars + profiles
+- [x] Extract DB credentials to env vars + profiles
 - [x] Expose Native Query endpoint
 - [x] Expose Interface Projection endpoint
 - [x] Expose DTO Projection endpoint
@@ -200,9 +195,10 @@ Common Mistakes → Testing → Troubleshooting → Next Step
 
 ### Phase 1 — Testing
 - [x] Address tests
-- [ ] Weather client tests
-- [ ] Pagination + Search + Specification tests (cursor/keyset/projection pagination now covered; existing search/specification endpoints still untested)
-- [ ] Exception handler tests
+- [x] Weather client tests
+- [x] Cursor / Keyset / Projection pagination tests
+- [ ] Search + Specification endpoint tests (`/api/employees/search`, `/api/employees/specification` still untested)
+- [x] Exception handler tests
 
 ### Phase 2 — Documentation
 - [ ] Release Notes

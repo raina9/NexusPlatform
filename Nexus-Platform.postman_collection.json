@@ -1,0 +1,562 @@
+{
+  "info": {
+    "_postman_id": "3f9a1b2c-4d5e-4f60-8a1b-1c2d3e4f5a6b",
+    "name": "Nexus Platform",
+    "description": "Postman collection for the Nexus Platform Spring Boot reference API — Employee, Address, Department, Weather integrations, and REST client demo endpoints. All requests target the app running locally on port 9191.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:9191",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Employee",
+      "item": [
+        {
+          "name": "Create Employee",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Shivendra\",\n  \"lastName\": \"Raina\",\n  \"email\": \"shivendra@gmail.com\",\n  \"salary\": 100000.0\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/employees",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees"]
+            },
+            "description": "Creates a new employee record."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Employee By Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/employees/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees", "1"]
+            },
+            "description": "Fetches a single employee by its id."
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Employees",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/employees",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees"]
+            },
+            "description": "Fetches every employee with no pagination."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Employee",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/employees/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees", "1"]
+            },
+            "description": "Deletes an employee by id."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Employees - Offset Pagination",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/employees/page?page=0&size=10&sort=firstName,asc",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees", "page"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" },
+                { "key": "sort", "value": "firstName,asc" }
+              ]
+            },
+            "description": "Standard Spring Data offset pagination via page/size/sort query params."
+          },
+          "response": []
+        },
+        {
+          "name": "Search Employees By First Name",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/employees/search?firstName=Shiv",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees", "search"],
+              "query": [
+                { "key": "firstName", "value": "Shiv" }
+              ]
+            },
+            "description": "Case-insensitive substring search on employee first name."
+          },
+          "response": []
+        },
+        {
+          "name": "Specification Search By First Name",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/employees/specification?firstName=Shiv",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees", "specification"],
+              "query": [
+                { "key": "firstName", "value": "Shiv" }
+              ]
+            },
+            "description": "Search by first name using a JPA Specification instead of a derived query method."
+          },
+          "response": []
+        },
+        {
+          "name": "Salary Filter (JPQL)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/employees/salary?salary=50000",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees", "salary"],
+              "query": [
+                { "key": "salary", "value": "50000" }
+              ]
+            },
+            "description": "Returns employees with a salary greater than the given amount, using a JPQL query."
+          },
+          "response": []
+        },
+        {
+          "name": "Salary Filter (Native Query)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/employees/native?salary=50000",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees", "native"],
+              "query": [
+                { "key": "salary", "value": "50000" }
+              ]
+            },
+            "description": "Returns employees with a salary greater than the given amount, using a native SQL query."
+          },
+          "response": []
+        },
+        {
+          "name": "Cursor Pagination",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/employees/cursor?cursor=0&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees", "cursor"],
+              "query": [
+                { "key": "cursor", "value": "0", "description": "Last employee id seen; 0 for the first page" },
+                { "key": "size", "value": "10" }
+              ]
+            },
+            "description": "Cursor-based pagination using employee id as the cursor. Use the nextCursor from the previous response to fetch the next page."
+          },
+          "response": []
+        },
+        {
+          "name": "Keyset Pagination (Native Query)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/employees/keyset?afterId=0&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees", "keyset"],
+              "query": [
+                { "key": "afterId", "value": "0", "description": "Fetch rows with id greater than this value; 0 for the first page" },
+                { "key": "size", "value": "10" }
+              ]
+            },
+            "description": "Keyset pagination implemented via a native SQL query (WHERE id > :afterId ORDER BY id ASC LIMIT :size)."
+          },
+          "response": []
+        },
+        {
+          "name": "Interface Projection - Offset Pagination",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/employees/projection/interface?page=0&size=10&sort=firstName,asc",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees", "projection", "interface"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" },
+                { "key": "sort", "value": "firstName,asc" }
+              ]
+            },
+            "description": "Returns id/firstName/salary via a Spring Data interface-based projection, with offset pagination."
+          },
+          "response": []
+        },
+        {
+          "name": "Interface Projection - Cursor Pagination",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/employees/projection/interface/cursor?cursor=0&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees", "projection", "interface", "cursor"],
+              "query": [
+                { "key": "cursor", "value": "0" },
+                { "key": "size", "value": "10" }
+              ]
+            },
+            "description": "Interface projection with cursor-based pagination."
+          },
+          "response": []
+        },
+        {
+          "name": "Interface Projection - Keyset Pagination",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/employees/projection/interface/keyset?afterId=0&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees", "projection", "interface", "keyset"],
+              "query": [
+                { "key": "afterId", "value": "0" },
+                { "key": "size", "value": "10" }
+              ]
+            },
+            "description": "Interface projection with keyset pagination via a native query."
+          },
+          "response": []
+        },
+        {
+          "name": "DTO Projection - Offset Pagination",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/employees/projection/dto?page=0&size=10&sort=firstName,asc",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees", "projection", "dto"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" },
+                { "key": "sort", "value": "firstName,asc" }
+              ]
+            },
+            "description": "Returns id/firstName/salary via a JPQL constructor-expression DTO projection, with offset pagination."
+          },
+          "response": []
+        },
+        {
+          "name": "DTO Projection - Cursor Pagination",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/employees/projection/dto/cursor?cursor=0&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees", "projection", "dto", "cursor"],
+              "query": [
+                { "key": "cursor", "value": "0" },
+                { "key": "size", "value": "10" }
+              ]
+            },
+            "description": "DTO projection with cursor-based pagination."
+          },
+          "response": []
+        },
+        {
+          "name": "DTO Projection - Keyset Pagination",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/employees/projection/dto/keyset?afterId=0&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees", "projection", "dto", "keyset"],
+              "query": [
+                { "key": "afterId", "value": "0" },
+                { "key": "size", "value": "10" }
+              ]
+            },
+            "description": "DTO projection with keyset pagination. Rows are fetched via a native query and mapped to the DTO after fetch, since JPQL constructor expressions aren't valid in native SQL."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Address",
+      "item": [
+        {
+          "name": "Create Address",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"city\": \"Pune\",\n  \"state\": \"Maharashtra\",\n  \"country\": \"India\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/employees/1/addresses",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees", "1", "addresses"]
+            },
+            "description": "Creates a new address for employee 1."
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Addresses For Employee",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/employees/1/addresses",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees", "1", "addresses"]
+            },
+            "description": "Fetches all addresses belonging to employee 1."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Address By Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/employees/1/addresses/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees", "1", "addresses", "1"]
+            },
+            "description": "Fetches a single address by id, scoped to employee 1."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Address",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/employees/1/addresses/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees", "1", "addresses", "1"]
+            },
+            "description": "Deletes an address by id, scoped to employee 1."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Department",
+      "item": [
+        {
+          "name": "Create Department",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"departmentName\": \"Engineering\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/departments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "departments"]
+            },
+            "description": "Creates a new department record."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Department By Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/departments/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "departments", "1"]
+            },
+            "description": "Fetches a single department by its id, read directly from the database."
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Departments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/departments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "departments"]
+            },
+            "description": "Fetches every department."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Department",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/departments/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "departments", "1"]
+            },
+            "description": "Deletes a department by id."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Department Via WebClient",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/departments/webclient/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "departments", "webclient", "1"]
+            },
+            "description": "Fetches a department by id, but routed through DepartmentWebClient — a self-call over HTTP using Spring WebClient instead of a direct repository lookup."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Weather",
+      "item": [
+        {
+          "name": "Current Weather (RestTemplate)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/weather/rest/London",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "weather", "rest", "London"]
+            },
+            "description": "Fetches current weather for a city from WeatherAPI, using a Spring RestTemplate client."
+          },
+          "response": []
+        },
+        {
+          "name": "Current Weather (WebClient)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/weather/webclient/London",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "weather", "webclient", "London"]
+            },
+            "description": "Fetches current weather for a city from WeatherAPI, using a reactive Spring WebClient."
+          },
+          "response": []
+        },
+        {
+          "name": "Current Weather (Feign)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/weather/feign/London",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "weather", "feign", "London"]
+            },
+            "description": "Fetches current weather for a city from WeatherAPI, using a declarative OpenFeign client."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "REST Clients",
+      "item": [
+        {
+          "name": "Get Employee via RestTemplate",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/test/employee/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["test", "employee", "1"]
+            },
+            "description": "Demonstrates calling GET /api/employees/{id} on this same instance through EmployeeClient (Spring RestTemplate)."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Employee via WebClient",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/webclient/employees/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["webclient", "employees", "1"]
+            },
+            "description": "Demonstrates calling GET /api/employees/{id} on this same instance through EmployeeWebClient (Spring WebClient)."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Employee via Feign",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/feign/employee/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["feign", "employee", "1"]
+            },
+            "description": "Demonstrates calling GET /api/employees/{id} on this same instance through EmployeeFeignClient (OpenFeign declarative client)."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
