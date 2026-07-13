@@ -1,0 +1,131 @@
+Folder PATH listing for volume Acer
+Volume serial number is 00000186 EC9F:7E59
+C:\USERS\SHIVE\SHIVENDRA_WORKSPACE\NEXUS-PLATFORM\SRC
++---main
+¦   +---java
+¦   ¦   +---com
+¦   ¦       +---raina
+¦   ¦           +---nexus
+¦   ¦               ¦   NexusPlatformApplication.java
+¦   ¦               ¦   
+¦   ¦               +---client
+¦   ¦               ¦   ¦   EmployeeClient.java
+¦   ¦               ¦   ¦   
+¦   ¦               ¦   +---config
+¦   ¦               ¦   ¦       WebClientConfig.java
+¦   ¦               ¦   ¦       
+¦   ¦               ¦   +---controller
+¦   ¦               ¦   ¦       WebClientTestController.java
+¦   ¦               ¦   ¦       
+¦   ¦               ¦   +---feign
+¦   ¦               ¦   ¦       EmployeeFeignClient.java
+¦   ¦               ¦   ¦       
+¦   ¦               ¦   +---webclient
+¦   ¦               ¦           DepartmentWebClient.java
+¦   ¦               ¦           EmployeeWebClient.java
+¦   ¦               ¦           
+¦   ¦               +---common
+¦   ¦               ¦   +---response
+¦   ¦               ¦           ApiResponse.java
+¦   ¦               ¦           ErrorResponse.java
+¦   ¦               ¦           
+¦   ¦               +---config
+¦   ¦               ¦       DepartmentDataSourceConfig.java
+¦   ¦               ¦       EmployeeDataSourceConfig.java
+¦   ¦               ¦       RestTemplateConfig.java
+¦   ¦               ¦       
+¦   ¦               +---department
+¦   ¦               ¦   +---controller
+¦   ¦               ¦   ¦       DepartmentController.java
+¦   ¦               ¦   ¦       
+¦   ¦               ¦   +---dto
+¦   ¦               ¦   ¦       DepartmentRequest.java
+¦   ¦               ¦   ¦       DepartmentResponse.java
+¦   ¦               ¦   ¦       
+¦   ¦               ¦   +---repository
+¦   ¦               ¦   ¦       DepartmentRepository.java
+¦   ¦               ¦   ¦       
+¦   ¦               ¦   +---service
+¦   ¦               ¦           DepartmentService.java
+¦   ¦               ¦           
+¦   ¦               +---employee
+¦   ¦               ¦   +---controller
+¦   ¦               ¦   ¦       EmployeeController.java
+¦   ¦               ¦   ¦       FeignTestController.java
+¦   ¦               ¦   ¦       TestController.java
+¦   ¦               ¦   ¦       
+¦   ¦               ¦   +---dto
+¦   ¦               ¦   ¦       EmployeeRequest.java
+¦   ¦               ¦   ¦       EmployeeResponse.java
+¦   ¦               ¦   ¦       EmployeeSummaryResponse.java
+¦   ¦               ¦   ¦       
+¦   ¦               ¦   +---projection
+¦   ¦               ¦   ¦       EmployeeProjection.java
+¦   ¦               ¦   ¦       
+¦   ¦               ¦   +---repository
+¦   ¦               ¦   ¦       AddressRepository.java
+¦   ¦               ¦   ¦       EmployeeRepository.java
+¦   ¦               ¦   ¦       
+¦   ¦               ¦   +---service
+¦   ¦               ¦   ¦       EmployeeService.java
+¦   ¦               ¦   ¦       
+¦   ¦               ¦   +---specification
+¦   ¦               ¦           EmployeeSpecification.java
+¦   ¦               ¦           
+¦   ¦               +---entity
+¦   ¦               ¦   +---department
+¦   ¦               ¦   ¦       Department.java
+¦   ¦               ¦   ¦       
+¦   ¦               ¦   +---employee
+¦   ¦               ¦           Address.java
+¦   ¦               ¦           Employee.java
+¦   ¦               ¦           
+¦   ¦               +---exception
+¦   ¦               ¦       ErrorResponse.java
+¦   ¦               ¦       GlobalExceptionHandler.java
+¦   ¦               ¦       ResourceNotFoundException.java
+¦   ¦               ¦       
+¦   ¦               +---external
+¦   ¦                   +---weather
+¦   ¦                       +---client
+¦   ¦                       ¦       WeatherFeignClient.java
+¦   ¦                       ¦       
+¦   ¦                       +---controller
+¦   ¦                       ¦       WeatherFeignController.java
+¦   ¦                       ¦       WeatherRestTemplateController.java
+¦   ¦                       ¦       WeatherWebClientController.java
+¦   ¦                       ¦       
+¦   ¦                       +---dto
+¦   ¦                       ¦       WeatherResponse.java
+¦   ¦                       ¦       
+¦   ¦                       +---service
+¦   ¦                               WeatherFeignService.java
+¦   ¦                               WeatherRestTemplateService.java
+¦   ¦                               WeatherWebClientService.java
+¦   ¦                               
+¦   +---resources
+¦       ¦   application.yaml
+¦       ¦   
+¦       +---static
+¦       +---templates
++---test
+    +---java
+        +---com
+            +---raina
+                +---nexus
+                    ¦   NexusPlatformApplicationTests.java
+                    ¦   
+                    +---department
+                    ¦   +---controller
+                    ¦   ¦       DepartmentControllerTest.java
+                    ¦   ¦       
+                    ¦   +---service
+                    ¦           DepartmentServiceTest.java
+                    ¦           
+                    +---employee
+                        +---controller
+                        ¦       EmployeeControllerTest.java
+                        ¦       
+                        +---service
+                                EmployeeServiceTest.java
+                                
