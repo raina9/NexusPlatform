@@ -204,10 +204,6 @@ Common Mistakes → Testing → Troubleshooting → Next Step
 - [ ] Interview Q&A Bank
 - [ ] One-Line Revision Sheets
 
-### Phase 3 — Future Features
-Swagger/OpenAPI → Spring Security → JWT → Kafka → Redis →
-Docker → Flyway → Actuator → TestContainers
-
 ---
 
 ## NON-NEGOTIABLES (Inherited + Nexus-specific)
