@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.5.4</version>
+		<version>4.1.0</version>
 		<relativePath/>
 	</parent>
 
@@ -25,10 +25,13 @@
 	<properties>
 
 		<!-- Java Version -->
-		<java.version>17</java.version>
+		<java.version>25</java.version>
 
 		<!-- Spring Cloud Version -->
-		<spring-cloud.version>2025.0.0</spring-cloud.version>
+		<spring-cloud.version>2025.1.2</spring-cloud.version>
+
+		<!-- Lombok Version (Boot-managed default lacks confirmed JDK 25 support) -->
+		<lombok.version>1.18.40</lombok.version>
 
 	</properties>
 
@@ -109,6 +112,13 @@
 			<scope>test</scope>
 		</dependency>
 
+		<!-- @WebMvcTest support (split out of spring-boot-test-autoconfigure in Boot 4) -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-webmvc-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
 		<!-- Mockito -->
 		<dependency>
 			<groupId>org.mockito</groupId>
@@ -150,7 +160,7 @@
 						<path>
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
-							<version>1.18.38</version>
+							<version>${lombok.version}</version>
 						</path>
 
 					</annotationProcessorPaths>

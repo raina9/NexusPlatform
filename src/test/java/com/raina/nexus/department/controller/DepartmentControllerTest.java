@@ -1,14 +1,14 @@
 package com.raina.nexus.department.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import com.raina.nexus.department.dto.DepartmentRequest;
 import com.raina.nexus.department.dto.DepartmentResponse;
 import com.raina.nexus.department.service.DepartmentService;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -28,7 +28,7 @@ class DepartmentControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
+    @MockitoBean
     private DepartmentService departmentService;
 
     @Test
@@ -52,8 +52,8 @@ class DepartmentControllerTest {
                                 .content(objectMapper.writeValueAsString(request))
                 )
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.departmentName")
+                .andExpect(jsonPath("$.data.id").value(1))
+                .andExpect(jsonPath("$.data.departmentName")
                         .value("Engineering"));
     }
 
@@ -71,8 +71,8 @@ class DepartmentControllerTest {
 
         mockMvc.perform(get("/api/departments/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.departmentName")
+                .andExpect(jsonPath("$.data.id").value(1))
+                .andExpect(jsonPath("$.data.departmentName")
                         .value("Engineering"));
     }
 }

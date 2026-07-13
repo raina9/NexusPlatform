@@ -1,13 +1,13 @@
 # NEXUS PLATFORM — CLAUDE.md
-# Governed by: TheCodeForgeWorkspace/CLAUDE.md (Global Brain v1.0)
-# Location: TakshilaAI/VishvakarmaAI/NexusPlatform/
+# Governed by: Root Workspace CLAUDE.md (Global Brain v1.0)
+# Location: Workspace/Projects/NexusPlatform/
 # Last Updated: 2026-07-13
 
 ---
 
 ## INHERITANCE
 
-This file inherits ALL rules from TheCodeForgeWorkspace/CLAUDE.md.
+This file inherits ALL rules from the Root Workspace CLAUDE.md.
 Golden Rules, 100 Engineering Parameters, Error Handling Standard,
 Open Source Release Standard, Session Output Rule, Mentor Behaviour —
 all apply unless explicitly overridden below.
