@@ -44,10 +44,6 @@ Testing         : JUnit 5 + Mockito + MockMvc
 Logging         : SLF4J + Logback
 ```
 
-**Not yet implemented (Future Roadmap):**
-Swagger/OpenAPI, Spring Security, JWT, OAuth2, Kafka, Redis,
-Docker, Docker Compose, Flyway, Actuator, AWS, CI/CD, TestContainers
-
 ---
 
 ## BUSINESS DOMAIN
