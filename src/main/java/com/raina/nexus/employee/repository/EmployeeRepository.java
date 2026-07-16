@@ -39,7 +39,7 @@ public interface EmployeeRepository
             @Param("salary") Double salary);
 
     @Query("""
-       SELECT e
+       SELECT e.id AS id, e.firstName AS firstName, e.salary AS salary
        FROM Employee e
        """)
     List<EmployeeProjection> findEmployeeProjection();
@@ -80,13 +80,13 @@ public interface EmployeeRepository
             @Param("size") int size);
 
     @Query("""
-       SELECT e
+       SELECT e.id AS id, e.firstName AS firstName, e.salary AS salary
        FROM Employee e
        """)
     Page<EmployeeProjection> findEmployeeProjectionPage(Pageable pageable);
 
     @Query("""
-       SELECT e
+       SELECT e.id AS id, e.firstName AS firstName, e.salary AS salary
        FROM Employee e
        WHERE e.id > :cursor
        ORDER BY e.id ASC

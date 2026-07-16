@@ -227,23 +227,26 @@ the way you'd walk an interviewer through a design doc.
   in maintenance mode upstream — new code should default to `WebClient` (or `RestClient`, Spring's
   newer synchronous alternative) unless the whole call chain is genuinely reactive.
 
-### 2.7 Error code strategy (specific vs. generic) — an honest gap
+### 2.7 Error code strategy (specific vs. generic)
 
-- **Decision (aspirational, per project convention):** error codes should be specific
-  (`EMPLOYEE_NOT_FOUND`) rather than generic (`ERROR_001`).
+- **Decision:** error codes are specific (`EMPLOYEE_NOT_FOUND`, `ADDRESS_NOT_FOUND`,
+  `DEPARTMENT_NOT_FOUND`, `DEPARTMENT_FETCH_FAILED`) rather than generic (`ERROR_001`), and every
+  service that throws `ResourceNotFoundException` now applies one consistently.
 - **Problem:** `ErrorResponse` (`timestamp, status, error, message, path`) has no dedicated
   `errorCode` field — there is nowhere structured to put a machine-readable code.
-- **Solution as actually implemented:** it's inconsistent, and worth naming plainly if asked. AddressService
-  and DepartmentService's WebClient path embed a prefix directly in the exception *message string*
-  (`"EMPLOYEE_NOT_FOUND: Employee not found with id : 5"`, `"ADDRESS_NOT_FOUND: ..."`,
-  `"DEPARTMENT_FETCH_FAILED: ..."`, `"DEPARTMENT_NOT_FOUND: ..."`). EmployeeService's own CRUD paths
-  and DepartmentService's basic CRUD paths do **not** use a code prefix — they throw a plain
-  `"Employee not found with id : 5"`.
-- **Why this matters / what production would need:** a client can't reliably branch on a code that's
-  concatenated into a free-text message — it would have to parse the string. The correct fix is a
-  dedicated `errorCode` field on `ErrorResponse`, populated from an enum, with `ResourceNotFoundException`
-  carrying the code as a constructor argument instead of baking it into the message. Naming this gap
-  unprompted is a stronger interview answer than pretending the convention was applied consistently.
+- **Solution as actually implemented:** every `ResourceNotFoundException` thrown anywhere in the
+  codebase now carries a `CODE: human message` prefix baked into the exception message —
+  `EmployeeService` (`EMPLOYEE_NOT_FOUND`), `DepartmentService`'s basic CRUD paths
+  (`DEPARTMENT_NOT_FOUND`), `AddressService` (`EMPLOYEE_NOT_FOUND` for the parent lookup,
+  `ADDRESS_NOT_FOUND` for the child lookup), and `DepartmentService.getDepartmentViaWebClient`
+  (`DEPARTMENT_FETCH_FAILED` on transport failure, `DEPARTMENT_NOT_FOUND` on an empty body). This
+  makes the convention uniform, but it's still a *string* convention, not a structured one — see below.
+- **Why this matters / what production would still need:** a client still can't reliably branch on a
+  code that's concatenated into a free-text message without parsing the string. The more correct fix
+  is a dedicated `errorCode` field on `ErrorResponse`, populated from an enum, with
+  `ResourceNotFoundException` carrying the code as a constructor argument instead of baking it into the
+  message — worth naming as the next step if asked "how would you productionize this further," even
+  though the prefix convention is now applied consistently everywhere it's used.
 
 ### 2.8 Per-environment YAML profiles
 
@@ -446,21 +449,28 @@ entire design.
 
 - **What it is:** `EmployeeProjection` — an interface with only getter methods (`getId()`,
   `getFirstName()`, `getSalary()`), no implementation. Spring Data generates a runtime proxy for it.
-- **How Spring executes it internally:** because the backing `@Query` (`SELECT e FROM Employee e`)
-  still selects the *whole* entity, Hibernate loads full `Employee` rows and Spring Data's proxy just
-  exposes three of the fields through the interface — this is a **closed projection over a full-entity
-  select** in this specific implementation, not a column-limited SQL `SELECT`. (A derived-query-method
-  interface projection, e.g. `findByIdGreaterThan(Long id)` returning `EmployeeProjection` directly,
-  *would* get column pruning at the SQL level — the JPQL-authored version here does not.)
-- **Code pattern used here:** `findEmployeeProjectionPage`, `findEmployeeProjectionCursor`,
-  `findEmployeeProjectionKeyset` — the offset/cursor/keyset trio at
-  `/api/employees/projection/interface[...]`.
+- **How Spring executes it internally:** the backing `@Query` methods select individual aliased
+  columns (`SELECT e.id AS id, e.firstName AS firstName, e.salary AS salary FROM Employee e`) rather
+  than the whole entity (`SELECT e`). Hibernate translates that into a SQL `SELECT` naming only those
+  three columns, and Spring Data maps the resulting tuple onto the `EmployeeProjection` proxy by
+  matching each alias to the corresponding getter name (`id → getId()`, `firstName → getFirstName()`,
+  `salary → getSalary()`) — a genuine column-pruning projection, not a full-entity load exposed through
+  a narrower interface. (Without explicit column aliases matching the getters — e.g. a bare
+  `SELECT e FROM Employee e` — Spring Data instead loads the *full* entity and only narrows what's
+  exposed through the interface at the Java level, which is a real trap worth naming: the interface
+  alone guarantees nothing about the generated SQL, the query shape does.)
+- **Code pattern used here:** `findEmployeeProjectionPage`, `findEmployeeProjectionCursor` (JPQL with
+  aliased column selection) and `findEmployeeProjectionKeyset` (native SQL with aliased columns,
+  `SELECT id, first_name AS firstName, salary FROM employees ...`) — the offset/cursor/keyset trio at
+  `/api/employees/projection/interface[...]`, all three now selecting only the three required columns
+  at the SQL level.
 - **Interview questions:**
-  - *"Does an interface projection reduce the columns fetched from the database?"* — only when Spring
-    Data itself generates the query (derived method names); when the query is hand-written with `@Query
-    SELECT e FROM Employee e`, the full entity is loaded regardless of the projection interface's
-    shape — this is a subtlety worth stating explicitly, since it's the opposite of what the name
-    "projection" implies.
+  - *"Does an interface projection reduce the columns fetched from the database?"* — only when the
+    query itself selects individual aliased fields (either Spring Data deriving the query from a method
+    name, or a hand-written `@Query` with `SELECT e.id AS id, ...` aliases matching the getters) — a
+    hand-written `@Query` that selects the whole entity (`SELECT e FROM Employee e`) loads every column
+    regardless of the projection interface's shape, because the interface only controls what's exposed
+    in Java, not what SQL gets generated.
 
 ### 3.10 DTO Projection
 
@@ -563,6 +573,17 @@ over-fetches by one row to compute `hasNext` without a second query, then trims 
   with none of the reactive payoff since results are blocked on immediately — the honest reason to use
   it in an MVC app today is that it's still actively maintained and has a nicer, timeout-friendly
   builder API, not that it's "faster."
+- **Known limitation:** WebClient used synchronously in MVC stack — reactive benefit not realized.
+  Production fix: migrate to Spring WebFlux or use RestClient. Calling `.block()` at the end of every
+  chain (`DepartmentWebClient.getDepartment`, `WeatherWebClientService.getWeather`) means the calling
+  MVC thread is parked waiting on the network call exactly as it would be with `RestTemplate` — the
+  non-blocking, backpressure-aware behavior WebClient is built for never actually engages, because
+  nothing downstream of the `.block()` call is reactive. Two real fixes exist: (1) migrate the
+  controller chain to Spring WebFlux end-to-end so the `Mono`/`Flux` is returned and subscribed to by
+  the framework instead of blocked on manually, or (2) if the application is staying on the Spring MVC
+  (servlet) stack, replace this synchronous WebClient usage with `RestClient` — Spring's newer
+  synchronous HTTP client, purpose-built for exactly this call pattern, with the same modern
+  timeout/builder ergonomics as WebClient but without the misleading reactive type signature.
 
 ### 4.3 OpenFeign
 
@@ -576,10 +597,13 @@ over-fetches by one row to compute `hasNext` without a second query, then trims 
   using the `url` (or service-discovery `name`) configured on `@FeignClient`.
 - **Configuration in this project:** `EmployeeFeignClient` — `@FeignClient(name = "employee-client",
   url = "http://localhost:9191")`, a single `@GetMapping("/api/employees/{id}")` method returning
-  `EmployeeResponse` directly (not wrapped in `ApiResponse<T>` — worth noting as an inconsistency: this
-  client silently discards the envelope the actual endpoint returns and would fail deserialization or
-  return nulls for the wrapper fields if Feign tried to bind the raw JSON directly into
-  `EmployeeResponse`).
+  `ApiResponse<EmployeeResponse>` — matching the actual `{success, message, data}` envelope
+  `/api/employees/{id}` returns. `FeignTestController` calls
+  `employeeFeignClient.getEmployee(id).data()` to unwrap the payload before returning it. (This return
+  type previously declared `EmployeeResponse` directly, which would have mismatched the real response
+  envelope and either failed deserialization or produced a mostly-null object — a good example of why a
+  declarative client's return type has to be checked against the real endpoint response shape, not just
+  assumed from the method name.)
 - **Error handling:** None implemented — a non-2xx response throws `FeignException`, uncaught at any
   call site currently using this client, falling to the generic 500 handler.
 - **When to use:** Calling a known set of downstream REST endpoints where you'd rather declare a
@@ -781,10 +805,14 @@ over-fetches by one row to compute `hasNext` without a second query, then trims 
   entity's fields; Spring Data proxies it at runtime to expose just those fields from the query result.
 
 **Intermediate**
-- *Q: Does an interface projection always reduce the SQL columns fetched?* A: Only when Spring Data
-  itself generates the query from the method name — this project's `EmployeeProjection` is backed by a
-  hand-written `@Query SELECT e FROM Employee e`, which fetches the full entity regardless of the
-  projection interface, so no column pruning actually happens here despite the name.
+- *Q: Does an interface projection always reduce the SQL columns fetched?* A: Only when the query
+  itself selects individual aliased columns matching the projection's getters — either Spring Data
+  generating the query from a derived method name, or (as this project does) a hand-written `@Query`
+  with explicit aliases (`SELECT e.id AS id, e.firstName AS firstName, e.salary AS salary FROM
+  Employee e`). A hand-written `@Query SELECT e FROM Employee e` would fetch the full entity regardless
+  of the projection interface's shape — the interface only narrows what's exposed in Java, not what SQL
+  gets generated, which is why the query shape has to be checked, not assumed from the projection type
+  alone.
 - *Q: What does the DTO projection's `SELECT new package.Type(...)` constructor expression actually do
   to the SQL?* A: It genuinely limits the selected columns to exactly the constructor arguments listed
   (`id, first_name, salary` here), and the result is never attached to the persistence context.
@@ -817,15 +845,16 @@ over-fetches by one row to compute `hasNext` without a second query, then trims 
   actually happening on the wire.
 
 **Advanced**
-- *Q: This project's `EmployeeFeignClient` returns `EmployeeResponse` directly, but the actual
-  `/api/employees/{id}` endpoint returns `ApiResponse<EmployeeResponse>` — what happens when this
-  client is invoked?* A: Feign will attempt to deserialize the full JSON envelope
-  (`{success, message, data}`) directly into `EmployeeResponse`'s fields, which don't match — Jackson
-  would either fail deserialization or (depending on configured leniency) silently produce an
-  `EmployeeResponse` with null/default fields, since `EmployeeResponse` has no `success`/`message`/`data`
-  properties to bind against. The client's declared return type has drifted from what the server
-  actually returns — a good example of why declarative clients need contract tests against the real
-  endpoint.
+- *Q: `EmployeeFeignClient.getEmployee` declares its return type as `ApiResponse<EmployeeResponse>` —
+  why does that matter, given the real `/api/employees/{id}` endpoint returns `{success, message,
+  data}`?* A: Because the declared return type has to match the actual response envelope, not just the
+  "interesting" payload inside it — if the method declared a bare `EmployeeResponse` instead, Feign
+  would try to bind the full `{success, message, data}` JSON directly onto `EmployeeResponse`'s fields,
+  which don't match, and Jackson would either fail deserialization or silently produce an object with
+  null/default fields. Declaring `ApiResponse<EmployeeResponse>` and unwrapping with `.data()` at the
+  call site (as `FeignTestController` does) keeps the client's contract honest with what the server
+  actually sends — a good example of why declarative clients need their return type checked against the
+  real endpoint response, not assumed from the method name.
 - *Q: If you had to pick exactly one client for all internal service-to-service calls in a production
   version of this platform, which would you pick and why?* A: `WebClient` used synchronously (via
   `RestClient`, Spring's newer purpose-built synchronous client, would be an even better fit here) for
@@ -924,7 +953,7 @@ Read these out loud once before an interview. Every line should be sayable in un
 - **Specification API** → composable, type-safe Criteria API predicates for dynamic queries.
 - **JPQL** → entity-oriented query language, dialect-translated per persistence unit at query time.
 - **Native query** → raw engine-specific SQL, no JPQL translation, tied to one `DataSource`.
-- **Interface projection** → getter-only interface; only prunes SQL columns if Spring Data authors the query itself.
+- **Interface projection** → getter-only interface; prunes SQL columns only when the query selects aliased fields matching the getters.
 - **DTO projection (constructor expression)** → `SELECT new Type(...)` reliably selects only the listed columns.
 - **Dirty checking** → Hibernate auto-detects field changes on managed entities and flushes them on commit.
 
@@ -939,6 +968,7 @@ Read these out loud once before an interview. Every line should be sayable in un
 - **RestTemplate** → blocking, synchronous, maintenance mode — avoid for new code.
 - **WebClient** → reactive-capable client; only actually non-blocking if you never call `.block()`.
 - **`.block()`** → converts a reactive `Mono`/`Flux` chain back into synchronous, blocking behavior.
+- **Known limitation** → WebClient used synchronously in MVC stack — reactive benefit not realized. Production fix: migrate to Spring WebFlux or use RestClient.
 - **Feign** → declarative interface-based client; least boilerplate, least visibility into the wire call.
 - **Absolute URI overrides baseUrl** → passing a full URL into `WebClient.uri()` ignores the bean's configured base URL.
 - **`@EnableFeignClients`** → triggers classpath scan for `@FeignClient` interfaces at startup.
@@ -963,5 +993,5 @@ Read these out loud once before an interview. Every line should be sayable in un
 - **No cross-database transactions** → writes to both DBs in one flow are two separate local transactions, not atomic together.
 - **`ApiResponse<T>`** → uniform success envelope (`success`, `message`, `data`) across every endpoint.
 - **`ErrorResponse`** → uniform error envelope; currently has no dedicated error-code field, a known gap.
-- **Error code inconsistency** → some services embed codes in the message string, others don't — not applied uniformly.
+- **Error code convention** → every `ResourceNotFoundException` carries a `CODE: message` prefix (e.g. `EMPLOYEE_NOT_FOUND`); still string-based, not a dedicated `ErrorResponse` field.
 - **Self-call REST clients** → Employee and Department call each other over HTTP on the same running instance, not separate services — acceptable for a learning demo, called out explicitly rather than hidden.

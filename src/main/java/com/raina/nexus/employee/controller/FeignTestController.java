@@ -16,6 +16,6 @@ public class FeignTestController {
     public EmployeeResponse getEmployee(
             @PathVariable Long id) {
 
-        return employeeFeignClient.getEmployee(id);
+        return employeeFeignClient.getEmployee(id).data();
     }
 }

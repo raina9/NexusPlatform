@@ -67,12 +67,12 @@ public class EmployeeService {
                 .orElseThrow(() -> {
 
                     log.error(
-                            "Employee not found with id={}",
+                            "EMPLOYEE_NOT_FOUND: employee not found with id={}",
                             id
                     );
 
                     return new ResourceNotFoundException(
-                            "Employee not found with id : " + id
+                            "EMPLOYEE_NOT_FOUND: Employee not found with id : " + id
                     );
                 });
 
@@ -106,12 +106,12 @@ public class EmployeeService {
                 .orElseThrow(() -> {
 
                     log.error(
-                            "Employee not found with id={}",
+                            "EMPLOYEE_NOT_FOUND: employee not found with id={}",
                             id
                     );
 
                     return new ResourceNotFoundException(
-                            "Employee not found with id : " + id
+                            "EMPLOYEE_NOT_FOUND: Employee not found with id : " + id
                     );
                 });
 

@@ -60,12 +60,12 @@ public class DepartmentService {
                 .orElseThrow(() -> {
 
                     log.error(
-                            "Department not found with id={}",
+                            "DEPARTMENT_NOT_FOUND: department not found with id={}",
                             id
                     );
 
                     return new ResourceNotFoundException(
-                            "Department not found with id : " + id
+                            "DEPARTMENT_NOT_FOUND: Department not found with id : " + id
                     );
                 });
 
@@ -99,12 +99,12 @@ public class DepartmentService {
                 .orElseThrow(() -> {
 
                     log.error(
-                            "Department not found with id={}",
+                            "DEPARTMENT_NOT_FOUND: department not found with id={}",
                             id
                     );
 
                     return new ResourceNotFoundException(
-                            "Department not found with id : " + id
+                            "DEPARTMENT_NOT_FOUND: Department not found with id : " + id
                     );
                 });
 

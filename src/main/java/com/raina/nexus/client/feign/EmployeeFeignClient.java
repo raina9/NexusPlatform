@@ -1,5 +1,6 @@
 package com.raina.nexus.client.feign;
 
+import com.raina.nexus.common.response.ApiResponse;
 import com.raina.nexus.employee.dto.EmployeeResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 public interface EmployeeFeignClient {
 
     @GetMapping("/api/employees/{id}")
-    EmployeeResponse getEmployee(
+    ApiResponse<EmployeeResponse> getEmployee(
             @PathVariable Long id
     );
 }
